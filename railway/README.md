@@ -40,7 +40,7 @@
 | Custom Build Command | `npm run build` |
 | Pre-Deploy Command | `chmod +x ./railway/init-app.sh && sh ./railway/init-app.sh` |
 | Custom Start Command | 留空（用 Nixpacks 默认的 php-fpm + Caddy） |
-| Volume | 挂到 `/app/storage`，避免录音和 session 重启丢失 |
+| Volume | 挂到 `/app/storage/app`（不要挂整个 `/app/storage`，否则会把 views 目录盖空导致 Crash） |
 
 ### 必填变量
 
@@ -70,6 +70,7 @@ CACHE_STORE=file
 QUEUE_CONNECTION=database
 FILESYSTEM_DISK=local
 BROADCAST_CONNECTION=log
+RAILPACK_SKIP_MIGRATIONS=true
 
 NIXPACKS_PHP_VERSION=8.3
 ```

@@ -18,6 +18,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        foreach ([
+            storage_path('framework/cache/data'),
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
+            storage_path('logs'),
+            storage_path('app/public'),
+        ] as $directory) {
+            if (! is_dir($directory)) {
+                mkdir($directory, 0775, true);
+            }
+        }
+
         // Register Twilio services as singletons
         $this->app->singleton(TwilioService::class, function ($app) {
             return new TwilioService();

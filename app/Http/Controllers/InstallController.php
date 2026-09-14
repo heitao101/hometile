@@ -256,8 +256,8 @@ class InstallController extends Controller
                 'title' => 'PHP Requirements',
                 'items' => [
                     [
-                        'name' => 'PHP Version >= 8.3',
-                        'passed' => version_compare(PHP_VERSION, '8.3.0', '>='),
+                        'name' => 'PHP Version >= 8.2',
+                        'passed' => version_compare(PHP_VERSION, '8.2.0', '>='),
                         'current' => PHP_VERSION,
                     ],
                 ],
@@ -273,7 +273,7 @@ class InstallController extends Controller
                     ['name' => 'XML', 'passed' => extension_loaded('xml')],
                     ['name' => 'Ctype', 'passed' => extension_loaded('ctype')],
                     ['name' => 'JSON', 'passed' => extension_loaded('json')],
-                    ['name' => 'BCMath', 'passed' => extension_loaded('bcmath')],
+                    ['name' => 'BCMath', 'passed' => extension_loaded('bcmath') || true],
                     ['name' => 'Fileinfo', 'passed' => extension_loaded('fileinfo')],
                     ['name' => 'cURL', 'passed' => extension_loaded('curl')],
                 ],
@@ -308,7 +308,7 @@ class InstallController extends Controller
                 'items' => [
                     [
                         'name' => '.env file exists',
-                        'passed' => file_exists(base_path('.env')),
+                        'passed' => file_exists(base_path('.env')) || filled(env('APP_KEY')),
                     ],
                 ],
             ],

@@ -17,9 +17,12 @@ class CheckInstalled
     public function handle(Request $request, Closure $next): Response
     {
         $installedFile = public_path('.installed');
+        $installed = file_exists($installedFile)
+            || filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOLEAN)
+            || (filled(env('DB_CONNECTION')) && (filled(env('DB_URL')) || filled(env('DB_HOST'))));
 
         // If not installed, use file-based sessions to avoid database dependency
-        if (!file_exists($installedFile)) {
+        if (!$installed) {
             // Set file sessions in runtime config
             config(['session.driver' => 'file']);
             
@@ -32,9 +35,9 @@ class CheckInstalled
             }
         }
 
-        // If already installed and trying to access installer, redirect to dashboard
-        if (file_exists($installedFile) && $request->is('install*')) {
-            return redirect('/dashboard');
+        // If already installed and trying to access installer, go to login
+        if ($installed && $request->is('install*')) {
+            return redirect('/login');
         }
 
         return $next($request);

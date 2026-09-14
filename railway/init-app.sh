@@ -17,6 +17,9 @@ php artisan storage:link --force || php artisan storage:link || true
 
 # Skip the web installer on Railway. Env vars come from the dashboard, not a local .env.
 touch public/.installed
+if [ ! -f .env ]; then
+  : > .env
+fi
 
 php artisan config:cache
 php artisan event:cache

@@ -173,8 +173,11 @@ class SystemConfigController extends Controller
             // Store new logo in storage/app/public/theme directory
             $logoPath = $logoFile->store('theme', 'public');
             
-            // Update theme settings
+            // Update theme settings (persists on Railway without a .env file)
             $themeSetting->logo_path = $logoPath;
+            if (!empty($config['name'])) {
+                $themeSetting->site_name = $config['name'];
+            }
             $themeSetting->save();
             
             \Log::info('Logo uploaded and saved to ThemeSetting', ['path' => $logoPath]);
@@ -200,6 +203,12 @@ class SystemConfigController extends Controller
             \Log::info('Favicon uploaded and saved to ThemeSetting', ['path' => $faviconPath]);
         }
 
+        if (!empty($config['name'])) {
+            $themeSetting = \App\Models\ThemeSetting::first() ?? new \App\Models\ThemeSetting();
+            $themeSetting->site_name = $config['name'];
+            $themeSetting->save();
+        }
+
         $this->updateEnvFile($envData);
     }
 
@@ -213,7 +222,7 @@ class SystemConfigController extends Controller
         ]);
         
         if (!File::exists($envPath)) {
-            throw new \Exception('.env file not found');
+            File::put($envPath, "");
         }
 
         if (!is_writable($envPath)) {

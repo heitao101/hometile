@@ -1,5 +1,4 @@
 import { LanguageSelector } from '@/components/language-selector';
-import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
@@ -271,7 +270,7 @@ export default function Welcome({
                                         size="sm" 
                                         className="bg-black hover:bg-gray-800 text-white font-medium transition-all duration-300 group rounded-lg px-4 h-8"
                                     >
-                                        <Link href={dashboard()}>
+                                        <Link href="/dashboard">
                                             <span className="hidden sm:inline">Dashboard</span>
                                             <span className="sm:hidden">Panel</span>
                                             <ArrowRight className="ml-1.5 w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -285,7 +284,7 @@ export default function Welcome({
                                             size="sm"
                                             className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium transition-all duration-200 rounded-lg px-3 h-8"
                                         >
-                                            <Link href={login()}>
+                                            <Link href="/login">
                                                 Log in
                                             </Link>
                                         </Button>
@@ -295,7 +294,7 @@ export default function Welcome({
                                                 size="sm"
                                                 className="bg-black hover:bg-gray-800 text-white font-medium group transition-all duration-300 rounded-lg px-4 h-8"
                                             >
-                                                <Link href={register()}>
+                                                <Link href="/register">
                                                     <span className="hidden sm:inline">Get Started</span>
                                                     <span className="sm:hidden">Start</span>
                                                     <ArrowRight className="ml-1.5 w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -374,7 +373,7 @@ export default function Welcome({
                                             size="lg" 
                                             className="relative bg-white hover:bg-gray-100 text-gray-900 font-bold px-8 py-6 text-base group shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-500 overflow-hidden rounded-xl"
                                         >
-                                            <Link href={register()}>
+                                            <Link href="/register">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-gray-900/0 via-gray-900/10 to-gray-900/0 animate-shimmer-button" />
                                                 {React.createElement(getIcon(hero?.primary_cta_icon || 'Coins'), { className: "w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" })}
                                                 <span className="relative z-10">{hero?.primary_cta_text || 'Get Started'}</span>
@@ -397,7 +396,7 @@ export default function Welcome({
                                 )}
                                 {auth.user && (
                                     <Button asChild size="lg" className="bg-white hover:bg-gray-100 text-gray-900 font-bold px-8 py-6 text-base group shadow-2xl hover:scale-105 transition-all duration-300 rounded-xl">
-                                        <Link href={dashboard()}>
+                                        <Link href="/dashboard">
                                             <BarChart className="w-5 h-5 mr-2" />
                                             Go to Dashboard
                                             <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-2" />
@@ -681,12 +680,12 @@ export default function Welcome({
                                             }`}
                                         >
                                             {canRegister && !auth.user ? (
-                                                <Link href={register()}>
+                                                <Link href="/register">
                                                     Buy Now
                                                     <ArrowRight className="ml-2 w-4 h-4 group-hover/button:translate-x-1 transition-transform duration-300" />
                                                 </Link>
                                             ) : (
-                                                <Link href={dashboard()}>
+                                                <Link href="/dashboard">
                                                     Buy Now
                                                     <ArrowRight className="ml-2 w-4 h-4 group-hover/button:translate-x-1 transition-transform duration-300" />
                                                 </Link>
@@ -785,7 +784,7 @@ export default function Welcome({
                             {!auth.user && canRegister ? (
                                 <>
                                     <Button asChild size="lg" className="bg-white hover:bg-gray-100 text-gray-900 font-bold px-10 py-7 text-lg group shadow-2xl hover:scale-110 transition-all duration-300">
-                                        <Link href={register()}>
+                                        <Link href="/register">
                                             {React.createElement(getIcon(footer?.cta_primary_icon || 'Coins'), {
                                                 className: "w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300"
                                             })}
@@ -794,14 +793,14 @@ export default function Welcome({
                                         </Link>
                                     </Button>
                                     <Button asChild size="lg" variant="outline" className="border-2 border-gray-600 hover:bg-white/10 text-white px-10 py-7 text-lg font-bold hover:scale-110 transition-all duration-300 bg-transparent">
-                                        <Link href={login()}>
+                                        <Link href="/login">
                                             {footer?.cta_secondary_text || 'Sign In'}
                                         </Link>
                                     </Button>
                                 </>
                             ) : auth.user ? (
                                 <Button asChild size="lg" className="bg-white hover:bg-gray-100 text-gray-900 font-bold px-10 py-7 text-lg group shadow-2xl hover:scale-110 transition-all duration-300">
-                                    <Link href={dashboard()}>
+                                    <Link href="/dashboard">
                                         <BarChart className="w-5 h-5 mr-2" />
                                         Go to Dashboard
                                         <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-2" />

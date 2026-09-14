@@ -45,11 +45,19 @@ class HandleInertiaRequests extends Middleware
         $kycData = null;
         
         if ($user) {
-            $user->load('roles', 'kycVerification');
-            $userData = array_merge(
-                $user->toArray(),
-                ['permissions' => $user->permissions()->values()->all()]
-            );
+            try {
+                $user->load('roles', 'kycVerification');
+                $userData = array_merge(
+                    $user->toArray(),
+                    ['permissions' => $user->permissions()->values()->all()]
+                );
+            } catch (\Throwable $e) {
+                \Log::warning('Failed to share authenticated user data', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $userData = $user->toArray();
+            }
             
             // Add KYC information for all non-admin users
             if (!$user->hasRole('admin') && $user->kycVerification) {

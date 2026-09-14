@@ -101,6 +101,16 @@ return Application::configure(basePath: dirname(__DIR__))
             ->name('charge-monthly-phone-numbers');
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {
+            if ($response->getStatusCode() === 403 && $request->is('login', 'register', 'forgot-password', 'reset-password*')) {
+                if ($request->user()) {
+                    return redirect('/dashboard');
+                }
+            }
+
+            return $response;
+        });
+
         // Only integrate Sentry if the package is installed
         if (class_exists(\Sentry\Laravel\Integration::class)) {
             \Sentry\Laravel\Integration::handles($exceptions);

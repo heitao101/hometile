@@ -12,7 +12,8 @@ mkdir -p \
 chmod -R ug+rwx storage bootstrap/cache || true
 
 php artisan migrate --force
-php artisan db:seed --force
+# Do not seed on every deploy. ThemeSeeder inserts duplicate rows, and table
+# locks during seed make the live site return 403/blank pages until refresh.
 php artisan storage:link --force || php artisan storage:link || true
 
 # Skip the web installer on Railway. Env vars come from the dashboard, not a local .env.

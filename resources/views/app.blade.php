@@ -34,7 +34,12 @@
 
         {{-- SEO Meta Tags --}}
         @php
-            $themeSettings = \App\Models\ThemeSetting::first();
+            $themeSettings = null;
+            try {
+                $themeSettings = \App\Models\ThemeSetting::first();
+            } catch (\Throwable $e) {
+                $themeSettings = null;
+            }
         @endphp
         
         @if($themeSettings)
@@ -132,7 +137,12 @@
     <body class="font-sans antialiased">
         {{-- Google Tag Manager (noscript) --}}
         @php
-            $themeSettings = \App\Models\ThemeSetting::first();
+            $themeSettings = null;
+            try {
+                $themeSettings = \App\Models\ThemeSetting::first();
+            } catch (\Throwable $e) {
+                $themeSettings = null;
+            }
         @endphp
         @if($themeSettings && $themeSettings->google_tag_manager_id)
             <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $themeSettings->google_tag_manager_id }}"
@@ -140,14 +150,30 @@
         @endif
         
         @inertia
-        
-        <script src="https://res.zvo.cn/translate/translate.js"></script>
+
+        {{-- Load after React. Never execute here: this library hooks XHR/fetch and
+             corrupts Inertia JSON, which shows up as 403/blank pages until a full refresh. --}}
         <script>
-            translate.language.setLocal('english'); 
-            translate.service.use('client.edge'); 
-            translate.selectLanguageTag.show = false; 
-            translate.execute(); 
+            window.__bootPageTranslator = function () {
+                if (!window.translate || window.__pageTranslatorReady) {
+                    return;
+                }
+                try {
+                    translate.language.setLocal('english');
+                    translate.service.use('client.edge');
+                    translate.selectLanguageTag.show = false;
+                    if (translate.request && translate.request.listener) {
+                        translate.request.listener.use = false;
+                        translate.request.listener.start = function () {};
+                    }
+                    if (translate.listener) {
+                        translate.listener.start = function () {};
+                    }
+                    window.__pageTranslatorReady = true;
+                } catch (e) {}
+            };
         </script>
+        <script src="https://res.zvo.cn/translate/translate.js" defer onload="window.__bootPageTranslator && window.__bootPageTranslator()"></script>
         <style>
             #translate { display: none !important; }
         </style>

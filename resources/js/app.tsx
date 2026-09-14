@@ -8,6 +8,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import { initializeFont } from './hooks/use-font';
+import { refreshPageTranslation } from './lib/page-translator';
 import { Toaster } from 'sonner';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -49,6 +50,13 @@ router.on('navigate', (event) => {
     }
 });
 
+router.on('finish', () => {
+    window.setTimeout(() => refreshPageTranslation(), 50);
+});
+window.addEventListener('load', () => {
+    window.setTimeout(() => refreshPageTranslation(), 50);
+});
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) =>
@@ -65,6 +73,8 @@ createInertiaApp({
                 <App {...props} />
             </StrictMode>,
         );
+
+        window.setTimeout(() => refreshPageTranslation(), 50);
     },
     progress: {
         color: '#4B5563',

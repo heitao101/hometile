@@ -27,6 +27,10 @@ class CheckRole
 
         // Check if user has any of the required roles
         if (!$request->user()->hasAnyRole($roles)) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->route('dashboard')->with('error', 'You do not have permission to access this page.');
+            }
+
             abort(403, 'You do not have permission to access this page.');
         }
 

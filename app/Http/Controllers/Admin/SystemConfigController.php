@@ -54,12 +54,15 @@ class SystemConfigController extends Controller
                     // Clear all caches when app name or logo changes
                     Cache::flush();
                     Artisan::call('view:clear');
-                    Artisan::call('config:clear');
+                    if (! app()->environment('production')) {
+                        Artisan::call('config:clear');
+                    }
                     break;
             }
 
-            // Clear config cache
-            Artisan::call('config:clear');
+            if (! app()->environment('production')) {
+                Artisan::call('config:clear');
+            }
 
             \Log::info('System Config Updated Successfully', ['section' => $section]);
 

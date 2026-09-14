@@ -5,9 +5,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { changePageLanguage } from '@/lib/page-translator';
 import { Globe } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { router } from '@inertiajs/react';
 
 const languages = [
     { code: 'chinese_simplified', label: '简体中文' },
@@ -31,32 +30,6 @@ const languages = [
 ];
 
 export function LanguageSelector() {
-    const handleLanguageChange = (langCode: string) => {
-        if ((window as any).translate) {
-            (window as any).translate.changeLanguage(langCode);
-        } else {
-            console.warn('Translate.js is not loaded');
-        }
-    };
-
-    useEffect(() => {
-        const removeListener = router.on('finish', () => {
-            setTimeout(() => {
-                if ((window as any).translate) {
-                    (window as any).translate.execute();
-                }
-            }, 100);
-        });
-
-        if ((window as any).translate) {
-            (window as any).translate.execute();
-        }
-
-        return () => {
-            removeListener();
-        };
-    }, []);
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -69,7 +42,7 @@ export function LanguageSelector() {
                 {languages.map((lang) => (
                     <DropdownMenuItem
                         key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code)}
+                        onClick={() => changePageLanguage(lang.code)}
                         className="cursor-pointer"
                     >
                         {lang.label}

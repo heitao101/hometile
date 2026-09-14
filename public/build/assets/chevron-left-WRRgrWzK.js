@@ -1,0 +1,2 @@
+import{c as d}from"./createLucideIcon-CZnlVy6A.js";try{(function(){var e=typeof window<"u"?window:typeof global<"u"?global:typeof globalThis<"u"?globalThis:typeof self<"u"?self:{},n=new e.Error().stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="60717d4e-872f-4c19-be76-8667baac56cc",e._sentryDebugIdIdentifier="sentry-dbid-60717d4e-872f-4c19-be76-8667baac56cc")})()}catch{}const o=[["path",{d:"m15 18-6-6 6-6",key:"1wnfg3"}]],c=d("ChevronLeft",o);export{c as C};
+//# sourceMappingURL=chevron-left-WRRgrWzK.js.map

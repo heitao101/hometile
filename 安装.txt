@@ -1,0 +1,21 @@
+PHP Version >= 8.3 / MySQL8.0 / Apache
+
+编辑.env该文件，填写您的数据库信息和应用程序配置。
+
+运行迁移和种子
+php artisan key:generate
+php artisan migrate:fresh --seed
+
+创建软链接
+php artisan storage:link
+
+构建前端资源
+composer install
+npm install
+npm run build
+
+访问域名按提示安装
+
+管理员: admin@example.com / password
+用户: customer@example.com / password
+ai代理: agent@example.com / password 

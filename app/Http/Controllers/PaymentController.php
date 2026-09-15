@@ -24,7 +24,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'amount' => 'required|numeric|min:5|max:10000',
             'currency' => 'required|string|size:3',
-            'gateway' => 'nullable|string|in:stripe,razorpay',
+            'gateway' => 'nullable|string|in:stripe,razorpay,fungies',
         ]);
 
         $user = $request->user();
@@ -73,7 +73,11 @@ class PaymentController extends Controller
     {
         try {
             $payload = $request->getContent();
-            $signature = $request->header('Stripe-Signature'); // For Stripe
+            $signature = match ($gateway) {
+                'razorpay' => $request->header('X-Razorpay-Signature', ''),
+                'fungies' => $request->header('X-Fngs-Signature', ''),
+                default => $request->header('Stripe-Signature', ''),
+            };
 
             $this->paymentService->handleWebhook($gateway, $payload, $signature);
 

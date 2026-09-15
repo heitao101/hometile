@@ -37,6 +37,14 @@ interface SystemConfigProps {
       webhook_secret: string;
       test_mode: boolean;
     };
+    fungies: {
+      public: string;
+      secret: string;
+      webhook_secret: string;
+      product_id: string;
+      store_url: string;
+      webhook_url: string;
+    };
     mail: {
       mailer: string;
       host: string;
@@ -101,6 +109,17 @@ export default function SystemConfig({ config }: SystemConfigProps) {
     },
   });
 
+  const fungiesForm = useForm({
+    section: 'fungies',
+    config: {
+      public: config.fungies?.public || '',
+      secret: config.fungies?.secret || '',
+      webhook_secret: config.fungies?.webhook_secret || '',
+      product_id: config.fungies?.product_id || '',
+      store_url: config.fungies?.store_url || '',
+    },
+  });
+
   const mailForm = useForm({
     section: 'mail',
     config: {
@@ -154,6 +173,13 @@ export default function SystemConfig({ config }: SystemConfigProps) {
       onError: () => {
         // Flash message will be shown via useEffect
       },
+    });
+  };
+
+  const handleFungiesSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fungiesForm.post('/admin/system-config', {
+      preserveScroll: true,
     });
   };
 
@@ -275,10 +301,14 @@ export default function SystemConfig({ config }: SystemConfigProps) {
         )}
 
         <Tabs defaultValue="stripe" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="flex h-auto w-full flex-wrap gap-1">
             <TabsTrigger value="stripe" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
               <span>Stripe</span>
+            </TabsTrigger>
+            <TabsTrigger value="fungies" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span>Fungies</span>
             </TabsTrigger>
             <TabsTrigger value="razorpay" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
@@ -358,6 +388,139 @@ export default function SystemConfig({ config }: SystemConfigProps) {
                     <Button type="submit" disabled={stripeForm.processing}>
                       <Settings className="mr-2 h-4 w-4" />
                       Save Stripe Configuration
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </form>
+          </TabsContent>
+
+          {/* Fungies Configuration */}
+          <TabsContent value="fungies">
+            <form onSubmit={handleFungiesSubmit}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Fungies Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Use Fungies (Stripe Express) instead of a direct Stripe account. Keys stay in the database so they survive Railway deploys.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Get API keys from{' '}
+                      <a
+                        href="https://app.fungies.io"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium underline"
+                      >
+                        Fungies Dashboard
+                      </a>
+                      {' '}→ Developers → API keys. Create a one-time product such as “Credit Top-up”, then paste its product ID and your store URL.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fungies_public">Public Key</Label>
+                    <Input
+                      id="fungies_public"
+                      type="text"
+                      value={fungiesForm.data.config.public}
+                      onChange={(e) => fungiesForm.setData('config', {
+                        ...fungiesForm.data.config,
+                        public: e.target.value,
+                      })}
+                      placeholder="pub_..."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fungies_secret">Secret Key</Label>
+                    <Input
+                      id="fungies_secret"
+                      type="password"
+                      value={fungiesForm.data.config.secret}
+                      onChange={(e) => fungiesForm.setData('config', {
+                        ...fungiesForm.data.config,
+                        secret: e.target.value,
+                      })}
+                      placeholder="sec_..."
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Leave as dots to keep the existing value
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fungies_webhook_secret">Webhook Secret</Label>
+                    <Input
+                      id="fungies_webhook_secret"
+                      type="password"
+                      value={fungiesForm.data.config.webhook_secret}
+                      onChange={(e) => fungiesForm.setData('config', {
+                        ...fungiesForm.data.config,
+                        webhook_secret: e.target.value,
+                      })}
+                      placeholder="At least 16 characters, you choose this string"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Create the same secret in Fungies → Webhooks. It must be at least 16 characters.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fungies_product_id">Product ID</Label>
+                    <Input
+                      id="fungies_product_id"
+                      type="text"
+                      value={fungiesForm.data.config.product_id}
+                      onChange={(e) => fungiesForm.setData('config', {
+                        ...fungiesForm.data.config,
+                        product_id: e.target.value,
+                      })}
+                      placeholder="550e8400-e29b-41d4-a716-446655440000"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      UUID of the Credit Top-up product in Fungies (type can be DigitalDownload or OneTimePayment).
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fungies_store_url">Store URL</Label>
+                    <Input
+                      id="fungies_store_url"
+                      type="url"
+                      value={fungiesForm.data.config.store_url}
+                      onChange={(e) => fungiesForm.setData('config', {
+                        ...fungiesForm.data.config,
+                        store_url: e.target.value,
+                      })}
+                      placeholder="https://yourstore.fungies.io"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fungies_webhook_url">Webhook URL</Label>
+                    <Input
+                      id="fungies_webhook_url"
+                      type="text"
+                      readOnly
+                      value={config.fungies?.webhook_url || ''}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      In Fungies, add a webhook to this URL and subscribe to payment_success. Use the same signing secret as above.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button type="submit" disabled={fungiesForm.processing}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Save Fungies Configuration
                     </Button>
                   </div>
                 </CardContent>

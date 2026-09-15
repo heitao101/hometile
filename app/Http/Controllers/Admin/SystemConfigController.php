@@ -30,7 +30,7 @@ class SystemConfigController extends Controller
         ]);
 
         $request->validate([
-            'section' => 'required|in:stripe,razorpay,mail,application',
+            'section' => 'required|in:stripe,razorpay,fungies,mail,application',
             'config' => 'required|array',
             'logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
             'favicon' => 'nullable|image|mimes:png,jpg,jpeg,ico|max:1024',
@@ -45,6 +45,9 @@ class SystemConfigController extends Controller
                     break;
                 case 'razorpay':
                     $this->updateRazorpayConfig($request->config);
+                    break;
+                case 'fungies':
+                    $this->updateFungiesConfig($request->config);
                     break;
                 case 'mail':
                     $this->updateMailConfig($request->config);
@@ -90,6 +93,7 @@ class SystemConfigController extends Controller
                 'webhook_secret' => config('services.razorpay.webhook_secret') ? '••••••••' : '',
                 'test_mode' => config('services.razorpay.test_mode', true),
             ],
+            'fungies' => $this->getFungiesConfig(),
             'mail' => [
                 'mailer' => config('mail.default') ?? 'log',
                 'host' => config('mail.mailers.smtp.host') ?? '127.0.0.1',
@@ -129,6 +133,47 @@ class SystemConfigController extends Controller
             'RAZORPAY_WEBHOOK_SECRET' => $config['webhook_secret'] !== '••••••••' ? ($config['webhook_secret'] ?? '') : null,
             'RAZORPAY_TEST_MODE' => isset($config['test_mode']) ? ($config['test_mode'] ? 'true' : 'false') : 'true',
         ]);
+    }
+
+    private function getFungiesConfig(): array
+    {
+        $stored = \App\Models\PaymentGatewayConfig::credentials('fungies');
+
+        return [
+            'public' => $stored['public'] ?? config('services.fungies.public') ?? '',
+            'secret' => ($stored['secret'] ?? config('services.fungies.secret')) ? '••••••••' : '',
+            'webhook_secret' => ($stored['webhook_secret'] ?? config('services.fungies.webhook_secret')) ? '••••••••' : '',
+            'product_id' => $stored['product_id'] ?? config('services.fungies.product_id') ?? '',
+            'store_url' => $stored['store_url'] ?? config('services.fungies.store_url') ?? '',
+            'webhook_url' => rtrim((string) config('app.url'), '/').'/webhooks/payment/fungies',
+        ];
+    }
+
+    private function updateFungiesConfig(array $config)
+    {
+        $envData = [
+            'FUNGIES_PUBLIC_KEY' => $config['public'] ?? '',
+            'FUNGIES_SECRET_KEY' => ($config['secret'] ?? '') !== '••••••••' ? ($config['secret'] ?? null) : null,
+            'FUNGIES_WEBHOOK_SECRET' => ($config['webhook_secret'] ?? '') !== '••••••••' ? ($config['webhook_secret'] ?? null) : null,
+            'FUNGIES_PRODUCT_ID' => $config['product_id'] ?? '',
+            'FUNGIES_STORE_URL' => $config['store_url'] ?? '',
+        ];
+
+        \App\Models\PaymentGatewayConfig::put('fungies', 'Fungies', [
+            'public' => $config['public'] ?? '',
+            'secret' => ($config['secret'] ?? '') !== '••••••••' ? ($config['secret'] ?? null) : null,
+            'webhook_secret' => ($config['webhook_secret'] ?? '') !== '••••••••' ? ($config['webhook_secret'] ?? null) : null,
+            'product_id' => $config['product_id'] ?? '',
+            'store_url' => $config['store_url'] ?? '',
+        ]);
+
+        try {
+            $this->updateEnvFile($envData);
+        } catch (\Exception $e) {
+            \Log::warning('Fungies keys saved to database; .env was not writable', [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function updateMailConfig(array $config)

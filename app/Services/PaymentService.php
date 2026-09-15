@@ -7,6 +7,8 @@ use App\Models\Transaction;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\StripePaymentGateway;
 use App\Services\Payment\RazorpayPaymentGateway;
+use App\Services\Payment\FungiesPaymentGateway;
+use App\Models\PaymentGatewayConfig;
 use Illuminate\Support\Facades\Log;
 
 class PaymentService
@@ -26,6 +28,7 @@ class PaymentService
         return match($gateway) {
             'stripe' => new StripePaymentGateway(),
             'razorpay' => new RazorpayPaymentGateway(),
+            'fungies' => new FungiesPaymentGateway(),
             default => throw new \Exception('Unsupported payment gateway: ' . $gateway),
         };
     }
@@ -172,10 +175,26 @@ class PaymentService
                 'payment_id' => $event['payment_id'],
             ]);
 
-            // Find transaction by payment ID
+            // Find transaction by payment ID, then by metadata from the gateway.
             $transaction = Transaction::where('payment_id', $event['payment_id'])
                 ->where('payment_gateway', $gateway)
                 ->first();
+
+            if (!$transaction && !empty($event['metadata']['transaction_id'])) {
+                $transaction = Transaction::where('id', $event['metadata']['transaction_id'])
+                    ->where('payment_gateway', $gateway)
+                    ->first();
+            }
+
+            if (!$transaction && $gateway === 'fungies' && !empty($event['customer_email'])) {
+                $transaction = Transaction::where('payment_gateway', 'fungies')
+                    ->where('status', 'pending')
+                    ->whereHas('user', function ($query) use ($event) {
+                        $query->where('email', $event['customer_email']);
+                    })
+                    ->latest('id')
+                    ->first();
+            }
 
             if (!$transaction) {
                 Log::warning('Transaction not found for webhook', [
@@ -370,6 +389,19 @@ class PaymentService
     public function getAvailableGateways(): array
     {
         $gateways = [];
+
+        if ($this->isGatewayConfigured('fungies')) {
+            try {
+                $gateways[] = [
+                    'id' => 'fungies',
+                    'name' => 'Card (Fungies)',
+                    'icon' => '/images/fungies-icon.png',
+                    'supported_currencies' => $this->getSupportedCurrencies('fungies'),
+                ];
+            } catch (\Exception $e) {
+                Log::error('Failed to get Fungies currencies', ['error' => $e->getMessage()]);
+            }
+        }
         
         // Check if Stripe is configured
         if ($this->isGatewayConfigured('stripe')) {
@@ -410,7 +442,20 @@ class PaymentService
         return match($gateway) {
             'stripe' => !empty(config('services.stripe.secret')) && !empty(config('services.stripe.public')),
             'razorpay' => !empty(config('services.razorpay.api_key')) && !empty(config('services.razorpay.secret_key')),
+            'fungies' => $this->isFungiesConfigured(),
             default => false,
         };
+    }
+
+    protected function isFungiesConfigured(): bool
+    {
+        $stored = PaymentGatewayConfig::credentials('fungies');
+
+        $public = $stored['public'] ?? config('services.fungies.public');
+        $secret = $stored['secret'] ?? config('services.fungies.secret');
+        $productId = $stored['product_id'] ?? config('services.fungies.product_id');
+        $storeUrl = $stored['store_url'] ?? config('services.fungies.store_url');
+
+        return !empty($public) && !empty($secret) && !empty($productId) && !empty($storeUrl);
     }
 }

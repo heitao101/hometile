@@ -67,4 +67,14 @@ return [
         'fee_fixed' => env('RAZORPAY_FEE_FIXED', 0.0),
     ],
 
+    'fungies' => [
+        'public' => env('FUNGIES_PUBLIC_KEY'),
+        'secret' => env('FUNGIES_SECRET_KEY'),
+        'webhook_secret' => env('FUNGIES_WEBHOOK_SECRET'),
+        'product_id' => env('FUNGIES_PRODUCT_ID'),
+        'store_url' => env('FUNGIES_STORE_URL'),
+        'fee_percentage' => env('FUNGIES_FEE_PERCENTAGE', 2.9),
+        'fee_fixed' => env('FUNGIES_FEE_FIXED', 0.30),
+    ],
+
 ];

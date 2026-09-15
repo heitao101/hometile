@@ -117,6 +117,7 @@ export default function SystemConfig({ config }: SystemConfigProps) {
       webhook_secret: config.fungies?.webhook_secret || '',
       product_id: config.fungies?.product_id || '',
       store_url: config.fungies?.store_url || '',
+      webhook_url: config.fungies?.webhook_url || '',
     },
   });
 
@@ -508,12 +509,16 @@ export default function SystemConfig({ config }: SystemConfigProps) {
                     <Label htmlFor="fungies_webhook_url">Webhook URL</Label>
                     <Input
                       id="fungies_webhook_url"
-                      type="text"
-                      readOnly
-                      value={config.fungies?.webhook_url || ''}
+                      type="url"
+                      value={fungiesForm.data.config.webhook_url}
+                      onChange={(e) => fungiesForm.setData('config', {
+                        ...fungiesForm.data.config,
+                        webhook_url: e.target.value,
+                      })}
+                      placeholder="https://hometile-production.up.railway.app/webhooks/payment/fungies"
                     />
                     <p className="text-xs text-muted-foreground">
-                      In Fungies, add a webhook to this URL and subscribe to payment_success. Use the same signing secret as above.
+                      Copy this into Fungies → Webhooks. Until the www.teleman.online certificate is green, use the Railway HTTPS URL, not teleman.online.
                     </p>
                   </div>
 

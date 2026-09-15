@@ -135,6 +135,23 @@ class SystemConfigController extends Controller
         ]);
     }
 
+    private function fungiesWebhookUrl(array $stored): string
+    {
+        if (! empty($stored['webhook_url'])) {
+            return rtrim((string) $stored['webhook_url'], '/');
+        }
+
+        $fromApp = rtrim((string) config('app.url'), '/').'/webhooks/payment/fungies';
+        $railwayDomain = env('RAILWAY_PUBLIC_DOMAIN');
+
+        // www.teleman.online still has no valid certificate; Fungies needs a working HTTPS URL.
+        if (is_string($railwayDomain) && $railwayDomain !== '' && str_contains($fromApp, 'teleman.online')) {
+            return 'https://'.$railwayDomain.'/webhooks/payment/fungies';
+        }
+
+        return $fromApp;
+    }
+
     private function getFungiesConfig(): array
     {
         $stored = \App\Models\PaymentGatewayConfig::credentials('fungies');
@@ -145,7 +162,7 @@ class SystemConfigController extends Controller
             'webhook_secret' => ($stored['webhook_secret'] ?? config('services.fungies.webhook_secret')) ? '••••••••' : '',
             'product_id' => $stored['product_id'] ?? config('services.fungies.product_id') ?? '',
             'store_url' => $stored['store_url'] ?? config('services.fungies.store_url') ?? '',
-            'webhook_url' => rtrim((string) config('app.url'), '/').'/webhooks/payment/fungies',
+            'webhook_url' => $this->fungiesWebhookUrl($stored),
         ];
     }
 
@@ -165,6 +182,7 @@ class SystemConfigController extends Controller
             'webhook_secret' => ($config['webhook_secret'] ?? '') !== '••••••••' ? ($config['webhook_secret'] ?? null) : null,
             'product_id' => $config['product_id'] ?? '',
             'store_url' => $config['store_url'] ?? '',
+            'webhook_url' => $config['webhook_url'] ?? '',
         ]);
 
         try {
